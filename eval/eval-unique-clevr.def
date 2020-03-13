@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: python:3.6
+
+%environment
+  # use bash as default shell
+  SHELL=/bin/bash
+  export SHELL
+  
+  # set locale
+  export LANG=en_us.utf-8
+  export LC_CTYPE=en_US.UTF-8
+
+%setup
+  mkdir ${SINGULARITY_ROOTFS}/code
+
+%files
+
+  # Copy the eval code to the container
+  eval.py /code
+  util.py /code
+  requirements.txt /code/requirements.txt
+%post
+  # post-setup script
+
+  # default mount path for the output renders
+  mkdir  /data 
+
+  pip install -r /code/requirements.txt
+%runscript
+  # executes with the singularity run command
+  # delete this section to use existing docker ENTRYPOINT command
+  cd /code
+  exec python eval.py "$@" 

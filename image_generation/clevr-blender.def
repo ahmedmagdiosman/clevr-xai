@@ -1,0 +1,68 @@
+Bootstrap: docker
+From: aosmanai/blender:2.78c
+
+%environment
+  # use bash as default shell
+  SHELL=/bin/bash
+  export SHELL
+  
+  # blender envs
+  export BLENDER=/usr/local/blender
+  export PATH=$BLENDER:$PATH
+
+  # set locale
+  export LC_ALL=C.UTF-8
+  export LANG=C.UTF-8
+
+  # set PIPENV to exist inside project dir
+  export PIPENV_VENV_IN_PROJECT=true
+  
+  # set XDG_CONFIG_HOME to common-home (for persistent pudb3 settings)
+  export XDG_CONFIG_HOME=$HOME/.config/
+
+%setup
+  # add python script path to blender
+  echo /code >> ${SINGULARITY_ROOTFS}/usr/local/blender/2.78/python/lib/python3.5/site-packages/clevr.pth
+  mkdir ${SINGULARITY_ROOTFS}/code
+
+%files
+
+  # Copy the render code to the container (./. is equivalent to the current directory contents)
+  ./. /code
+%post
+  # post-setup script
+
+  # default mount path for the output renders
+  mkdir  /data 
+
+  # add python ppa for python3.5
+  # apt update && apt install -y software-properties-common && \
+  #   add-apt-repository ppa:deadsnakes/ppa
+  # install dev packages
+  apt update && \
+    apt install -y  python3 python3-dev tmux git xinput \
+    && rm -rf /var/lib/apt/lists/*
+  
+  # install pip and needed python packages for blender python
+  #curl https://bootstrap.pypa.io/get-pip.py | /usr/local/blender/2.78/python/bin/python3.5m -
+  
+  # Install python development header for blender python. Make sure it matches the included python version.
+  #curl https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz | tar xvz -C \
+  #  /usr/local/blender/2.78/python/include/python3.5m/ --strip-components=2
+  
+  # Install needed python packages for blender python
+  #/usr/local/blender/2.78/python/bin/python3.5m -m pip install orderedset
+
+
+  # link python to python3
+  ln -s /usr/bin/python3 /usr/bin/python
+  # install pip, setuptools, and wheel
+  curl https://bootstrap.pypa.io/get-pip.py | python -
+  # install pipenv for dev 
+  python -m pip install pipenv 
+
+%runscript
+  # executes with the singularity run command
+  # delete this section to use existing docker ENTRYPOINT command
+   cd /code
+   CUDA_VISIBLE_DEVICES=0 /usr/local/blender/blender --background -noaudio --python render_images.py -- "$@" 

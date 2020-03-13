@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.swp
+*.pyc
+output/
+.venv/
+*.sif
+*venv/
+*.venv

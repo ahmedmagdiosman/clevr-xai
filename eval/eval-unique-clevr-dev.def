@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: python:3.6
+
+%environment
+  # use bash as default shell
+  SHELL=/bin/bash
+  export SHELL
+  
+  # set locale
+  export LANG=en_us.utf-8
+  export LC_CTYPE=en_US.UTF-8
+
+  # set PIPENV to exist inside project dir
+  export PIPENV_VENV_IN_PROJECT=true
+  
+  # set XDG_CONFIG_HOME to common-home (for persistent pudb3 settings)
+  export XDG_CONFIG_HOME=$HOME/.config/
+
+%setup
+  mkdir ${SINGULARITY_ROOTFS}/code
+
+%files
+
+  # Copy the code to the container (./. is equivalent to the current directory contents)
+  eval.py /code/
+%post
+  # post-setup script
+
+  # default mount path for the output renders
+  mkdir  /data 
+  
+  apt update && \
+    apt install -y tmux git xinput \
+    && rm -rf /var/lib/apt/lists/*
+
+  # install pipenv and virtualenv for dev 
+  pip install pipenv 
+  pip install virtualenv
+
+%runscript
+  # executes with the singularity run command
+  # delete this section to use existing docker ENTRYPOINT command
+   cd /code
+   . venv/bin/activate && exec python eval.py "$@" 
