@@ -10,7 +10,7 @@ cd question_generation
   --templatedir ./CLEVR_unique_templates
 ```
 
-This script runs a python 3.6 container at run-time since there are no need to build a separate container to generate the questions. 
+This script runs a python 3.6 container at run-time since there is no need to build a separate container to generate the questions. 
 
 You can run this script without singularity like this (untested): 
 
@@ -22,8 +22,8 @@ python generate_questions.py --input_scene_file $INPUT_SCENE_FILE \
   --template_dir CLEVR_unique_templates/
 ```
 
-* `INPUT_SCENE_FILE` is the `CLEVR_scenes.json` file generated from the image generation step.
-* `OUTPUT_FILE_FULL_PATH` is the json file where the questions will be saved.
+* `$INPUT_SCENE_FILE` is the `CLEVR_scenes.json` file generated from the image generation step.
+* `$OUTPUT_FILE_FULL_PATH` is the json file where the questions will be saved.
 ## Description of the Output
 
 * The questions will be generated based on the templates in `CLEVR_unique_templates` and saved in `$OUTPUT_FILE_FULL_PATH` in JSON format.
