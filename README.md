@@ -8,9 +8,9 @@ The **_simply_-CLEVR dataset** was introduced in the paper [Towards Ground Truth
 
 |Question/Answer   | Image  | One Object Mask | All Objects Mask  |
 |:--------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
-| **What is the small yellow sphere made of?** <br> *metal*  | <img src="images/2891_original-1.png" width="256" height="256">        |   <img src="images/2891_MASK-1.png" width="256" height="256">  |   <img src="images/2891_MASK_ALL-1.png" width="256" height="256">  |
+| **What is the small <br> yellow sphere made of?** <br> *metal*  | <img src="images/2891_original-1.png" width="256">        |   <img src="images/2891_MASK-1.png" width="256">  |   <img src="images/2891_MASK_ALL-1.png" width="256">  |
 | **Method**  | **LRP**  | **IG**  | **GI**  | 
-| Heatmap |  <img src="images/2891_LRP-1.png" width="256" height="256">   |  <img src="images/2891_IG-1.png" width="256" height="256">   |  <img src="images/2891_GI-1.png" width="256" height="256">   |
+| Heatmap |  <img src="images/2891_LRP-1.png" width="256">   |  <img src="images/2891_IG-1.png" width="256">   |  <img src="images/2891_GI-1.png" width="256" >   |
 
 
 
