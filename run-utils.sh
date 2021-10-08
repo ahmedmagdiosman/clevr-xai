@@ -1,6 +1,5 @@
 #!/bin/bash
 # Some helper functions for bash
-# Based on https://vigitlab.fe.hhi.de/git/lrp-demo-website/raw/refactor-vqa-rest-api/build-utils.sh
 
 # A function, which checks whether a command/program is available or not
 function command_exists() {
