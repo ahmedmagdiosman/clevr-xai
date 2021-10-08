@@ -1,5 +1,5 @@
 
-# Generating Questions
+# Step 2: Question Generation
 
 To generate questions, run the script `question_generation/unique_question_gen_run.sh`. Show help with `-h`.
 
@@ -26,5 +26,5 @@ python generate_questions.py --input_scene_file $INPUT_SCENE_FILE \
 * `$OUTPUT_FILE_FULL_PATH` is the json file where the questions will be saved.
 ## Description of the Output
 
-* The questions will be generated based on the templates in `CLEVR_unique_templates` and saved in `$OUTPUT_FILE_FULL_PATH` in JSON format.
+* The questions will be generated based on the templates in `CLEVR_unique_templates` for simple questions (resp. `CLEVR_1.0_templates` for complex questions) and saved in `$OUTPUT_FILE_FULL_PATH` in JSON format.
 

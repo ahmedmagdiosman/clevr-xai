@@ -1,4 +1,5 @@
 #!/bin/bash
+# Based on https://vigitlab.fe.hhi.de/git/lrp-demo-website/blob/master/build.sh 
 # load run-utils
 . "$PWD/../run-utils.sh"
 

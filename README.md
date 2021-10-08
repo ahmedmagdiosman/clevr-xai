@@ -1,81 +1,102 @@
-**Note: The code and dataset presented in this branch corresponds to an [earlier version](https://arxiv.org/abs/2003.07258v1) of our work, and is kept here for legacy reasons. The [latest version](https://arxiv.org/abs/2003.07258) can be found in the master branch.**
+# CLEVR-XAI: A Benchmark Dataset for Evaluating XAI
 
-# simply-CLEVR Dataset
+**CLEVR-XAI** aims to provide a benchmark dataset for the quantitative evaluation of XAI explanations (aka heatmaps) in computer vision.
 
-The **simply-CLEVR dataset** aims to provide a benchmark dataset that can be used for transparent quantitative evaluation of explanation methods (aka heatmaps/XAI methods). 
+It is made of visual question answering (VQA) questions, which are derived from the original [CLEVR task](https://cs.stanford.edu/people/jcjohns/clevr/), and where each question is accompanied by several ground truth (GT) masks that can be used as a realistic, selective and controlled testbed for the evaluation of heatmaps on the input image.
 
-It is made of simple Visual Question Answering (VQA) questions, which are derived from the original [CLEVR task](https://cs.stanford.edu/people/jcjohns/clevr/), and where each question is accompanied by two Ground Truth Masks that serve as a basis for evaluating explanations on the input image.
+**CLEVR-XAI** was introduced in the paper [arXiv:2003.07258](https://arxiv.org/abs/2003.07258). Furthermore in this paper several XAI methods were tested against the CLEVR-XAI benchmark, in particular Layer-wise Relevance Propagation (LRP), Integrated Gradients, Guided Backprop, Guided Grad-CAM, SmoothGrad, VarGrad, Gradient, Gradient×Input, Deconvnet and Grad-CAM.
 
-The **simply-CLEVR dataset** was introduced in the paper [Towards Ground Truth Evaluation of Visual Explanations, Osman et al. 2020 arXiv:2003.07258v1](https://arxiv.org/pdf/2003.07258v1.pdf). Further, in this paper several explanation methods were tested against the simply-CLEVR benchmark: **Layer-wise Relevance Propagation (LRP)**, **Integrated Gradients (IG)** and **Gradient × Input (GI)**.
+The **CLEVR-XAI dataset** consists of **39,761 simple questions (CLEVR-XAI-simple)** and **100,000 complex questions (CLEVR-XAI-complex)**, which are based on the same underlying set of **10,000 images** (i.e., there are approx. 4 simple questions and 10 complex questions per image).
 
-|Question/Answer   | Image  | One Object Mask | All Objects Mask  |
+**CLEVR-XAI-simple** contains the following Ground Truths:
+- _GT Single Object_ (for all questions)
+- _GT All Objects_ (for all questions)
+
+**CLEVR-XAI-complex** contains the following Ground Truths:
+- _GT Unique_ (for 89,873 questions)
+- _GT Unique First-non-empty_ (for 99,786 questions)
+- _GT Union_ (for 99,786 questions)
+- _GT All Objects_ (for all questions)
+
+Note: For some complex questions a few GT masks are unavailable, since for these questions the masks are unspecified/empty.
+
+
+| <sub>CLEVR-XAI-simple</sub>  |  <sub>Image</sub>  |  <sub>GT Single Object</sub> |  <sub>GT All Objects</sub>  |
 |:--------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
-| **What is the small <br> yellow sphere made of?** <br> *metal*  | <img src="images/2891_original-1.png" width="256">        |   <img src="images/2891_MASK-1.png" width="256">  |   <img src="images/2891_MASK_ALL-1.png" width="256">  |
-| **Method**  | **LRP**  | **IG**  | **GI**  | 
-| Heatmap |  <img src="images/2891_LRP-1.png" width="256">   |  <img src="images/2891_IG-1.png" width="256">   |  <img src="images/2891_GI-1.png" width="256" >   |
+| **What is the <br> small yellow <br>sphere made <br> of?** <br> *metal*  | <img src="images/2891_original.png" width="256">        |   <img src="images/2891_GT_Single_Object.png" width="256">  |   <img src="images/2891_GT_All_Objects.png" width="256">  |
+|  <sub>**LRP**</sub>  | <sub>**Integrated Gradients**</sub>  | <sub>**Guided Backprop**</sub> | <sub>**Grad-CAM**</sub> |
+|  <img src="images/2891_LRP.png" width="256">   |  <img src="images/2891_IG.png" width="256">   |  <img src="images/2891_GB.png" width="256" >   | <img src="images/2891_GCAM.png" width="256" >   |
 
 
+| <sub>CLEVR-XAI-complex</sub>  |  <sub>Image</sub>  |  <sub>GT Unique</sub> |  <sub>GT Unique First-non-empty</sub>  |
+|:--------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
+| **Is there any <br> other thing <br> that has the <br> same size as <br> the shiny <br> sphere?** <br> *yes*  | <img src="images/57_original.png" width="256">        |   <img src="images/57_GT_Unique.png" width="256">  |   <img src="images/57_GT_Unique_Firstnonempty.png" width="256">  |
+|  <sub>**LRP**</sub>  | <sub>**Integrated Gradients**</sub>  | <sub>**Guided Backprop**</sub> | <sub>**Grad-CAM**</sub> |
+|  <img src="images/57_LRP.png" width="256">   |  <img src="images/57_IG.png" width="256">   |  <img src="images/57_GB.png" width="256" >   | <img src="images/57_GCAM.png" width="256" >   |
 
-## I. Dataset Description
 
-The **simply-CLEVR dataset** consists of **39,761 questions** and **10,000 images** (i.e. there are approximately 4 questions per image). 
+For more details on the definition of each GT please refer to the [paper](https://arxiv.org/abs/2003.07258). More broadly, note that simple questions always contain one target object for the VQA question, and complex questions can have several objects involved in the VQA question.
 
-You can download the dataset from the [releases](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) section of this repository.
+
+## I. Dataset Download
+
+ 
+The dataset can be downloaded from the [releases](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) section of this repository.
 
 
 
 ## II. Dataset Generation
 
-For reproducibility and to facilitate further work, we also provide the code to generate the *_simply-CLEVR_* dataset. Though note that if you want to only *use* the released version of the dataset you can skip the following generation steps.
+For the sake of completeness and to promote future research, we additionally provide the code to generate the CLEVR-XAI dataset. Note that if you are only interested in using the released version of our dataset you don't need to re-generate the dataset yourself and can directly download it [here](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases), thus you can skip the following generation steps.
 
-Our code is based on the original [CLEVR dataset generator](https://github.com/facebookresearch/clevr-dataset-gen/).
+Our code to generate CLEVR-XAI is built upon the original [CLEVR generator](https://github.com/facebookresearch/clevr-dataset-gen/).
 
-### Prerequisites
+To limit the amount of prerequisites, all our generation steps run inside containers with [Singularity](https://sylabs.io/singularity/). So Singularity is the only requirement to run the code. Here is a Singularity [quick start guide](https://sylabs.io/guides/3.3/user-guide/quick_start.html).
 
-To minimize the amount of prerequisites, all generation tasks run inside containers using [Singularity](https://sylabs.io/singularity/). So this is the only requirement to run the code.
- Here is a [quick start guide](https://sylabs.io/guides/3.3/user-guide/quick_start.html).
+### Step 1: Image Generation
 
-### Step 1: Generating Images
+Please refer to the README in the `image_generation` folder.
 
-Please refer to the README in the `image_generation` directory.
+### Step 2: Question Generation
 
-### Step 2: Generating Questions
+Please refer to the README in the `question_generation` folder.
 
-Please refer to the README in the `question_generation` directory.
+### Step 3: Ground Truth Masks Generation
 
-### Step 3: Generating Ground Truth Masks
+Please refer to the README in the `eval` folder. 
 
-Please refer to the README in the `eval` directory.  
-The ground truth generation also includes the resizing of the masks, in case your model takes input images of a different size than the original CLEVR images (the original CLEVR images have size 320x480).
-In our released simply-CLEVR dataset, we resized the masks to 128x128 (since the Relation Network model we use for generating heatmaps takes input images of size 128x128).
+This last step also includes the resizing of the masks, which can be useful in case your model takes input images of a different size than the CLEVR images (the original CLEVR images have size 320x480).
+
+In our released version of the CLEVR-XAI benchmark dataset, the masks were resized to the size 128x128 (since the Relation Network model we use for the evaluation of XAI methods takes input images of size 128x128), see our [paper](https://arxiv.org/abs/2003.07258) for more details on this step.
 
 
 
 ## III. Heatmap Generation
 
-We will release the code to generate heatmaps on simply-CLEVR and CLEVR, for different explanation methods, and using a trained Relation Network model in a separate repository.  
-(The link will be added upon paper acceptance)
+The code to generate heatmaps on a [Relation Network](https://papers.nips.cc/paper/2017/file/e6acf4b0f69f6f6e60e9a815938aa1ff-Paper.pdf) model which was trained on the original CLEVR dataset, and which was used to evaluate different XAI methods w.r.t. our CLEVR-XAI benchmark dataset, as done in the [paper](https://arxiv.org/abs/2003.07258), will be made publicly available upon paper publication (and at latest end of this year).
 
 
 
 ## IV. Heatmap Evaluation
 
-The code to evaluate heatmaps is currently available as a stand-alone Python [gist](https://gist.github.com/ArrasL/0bc02ef98e369f861aec40145a58e356).  
-(In the future we plan to automatize the evaluation process for more convenience, and integrate it in the present repository's `eval` directory)
+The code to evaluate heatmaps is currently available as a stand-alone [gist](https://gist.github.com/ArrasL/0bc02ef98e369f861aec40145a58e356).
+
+(In the future we may automatize this step and integrate it in the `eval` folder of this repository for more convenience.)
 
 
 
 ## Citation
 
-If you find our dataset or code useful, please cite:
+If you find our dataset or code useful, please cite the following updated [paper](https://arxiv.org/abs/2003.07258)*:
 
 ```
-@article{Osman_etal:2020,
-    title     = {{Towards Ground Truth Evaluation of Visual Explanations}},
-    author    = {Ahmed Osman and Leila Arras and Wojciech Samek},
-    journal   = {arXiv:2003.07258v1},
-    year      = {2020},
-    url       = {https://arxiv.org/pdf/2003.07258v1.pdf}
+@article{Arras_etal:2021,
+    title     = {{Ground Truth Evaluation of Neural Network Explanations with CLEVR-XAI}},
+    author    = {Leila Arras and Ahmed Osman and Wojciech Samek},
+    journal   = {arXiv:2003.07258},
+    year      = {2021},
+    url       = {https://arxiv.org/abs/2003.07258}
 }
 ```
 
+(*In an [earlier version](https://arxiv.org/abs/2003.07258v1) of our work we considered only simple questions and the dataset was named simply-CLEVR: this dataset is identical to CLEVR-XAI-simple. This earlier version also contained less XAI methods in the benchmarking experiments)
