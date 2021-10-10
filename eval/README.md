@@ -93,3 +93,10 @@ cd eval
 
 The `--sif` parameter is optional. It points the script to the location of the singularity sif file. By default, it is expected to be in `eval/eval-unique-clevr.sif`.
 
+## 4. Extra
+
+Calculate ground truth size in pixels.
+
+```bash
+python3 eval.py --config $CONFIG --gt-stats
+```

@@ -7,7 +7,7 @@ To generate questions, run the script `question_generation/unique_question_gen_r
 cd question_generation
 ./unique_question_gen_run.sh --input $INPUT_SCENE_FILE \
   --output $OUTPUT_FILE_FULL_PATH \
-  --templatedir ./CLEVR_unique_templates
+  --templatedir ./CLEVR_1.0_templates
 ```
 
 This script runs a python 3.6 container at run-time since there is no need to build a separate container to generate the questions. 

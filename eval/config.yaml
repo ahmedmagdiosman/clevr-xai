@@ -1,10 +1,14 @@
 background_color: [64, 64, 64]
-question_file: "/data/CLEVR_questions.json"
+question_file: "/data/CLEVR_complex_questions.json"
 masks_path: "/data/masks/"
 scenes_path: "/data/scenes/"
+# current valid filter values are
+# filters: ["union"]
+# filters: ["unique", "first_nonempty"]
+filters: ["unique", "first_nonempty"]
 # If ground_truth_path is given as a directory,
 # Then each ground truth is saved seperately
-ground_truth_path: "/data/ground_truth/"
+ground_truth_path: "/data/ground_truth_complex_questions/"
 # or
 #ground_truth_path: "/data/ground_truth.npy"
 

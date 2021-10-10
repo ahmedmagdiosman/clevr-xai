@@ -11,6 +11,7 @@ import yaml
 from tqdm import tqdm
 import numpy as np
 import util
+from typing import Tuple
 
 
 class UniqueCLEVREvaluator():
@@ -36,8 +37,10 @@ class UniqueCLEVREvaluator():
         self.questions = util.load_json(self.args["question_file"])["questions"]
         self.accuracy = None
         self.ground_truth = {}
+        self.ground_truth_stats = {}
         self.ground_truth_precomputed = self._try_load_ground_truth()
         self.target_all = self.args["target_all"]
+        self.filters = self.args["filters"]
 
     def _try_load_ground_truth(self) -> bool:
         """
@@ -66,11 +69,62 @@ class UniqueCLEVREvaluator():
 
         return True
 
-    def save_ground_truth(self) -> None:
+    def _calc_ground_truth_stats(self) -> None:
+        """
+        Calculates ground truth statistics. Currently only computes the size of the
+        ground truth object. Only compatible with simple-questions!
+        """
+        stats = {}
+
+
+        print("Calculating stats...")
+        for ques in tqdm(self.questions, total=len(self.questions)):
+            ques_id = ques["question_index"]
+            program = ques["program"]
+            scene = util.load_json(self.args["scenes_path"] + ques["image"] +
+                               ".json")
+            objects = scene["objects"]
+
+            # get target object
+            target_objects = []
+            target_objects_indices = []
+            # find the last filter_* function which has output==index of target objects
+            for func in reversed(program):
+                if func["type"].startswith("filter_"):
+                    target_objects_indices = func["_output"]
+                    target_objects = [objects[i] for i in target_objects_indices]
+                    break
+
+            if len(target_objects) == 0:
+                print(
+                "No target objects found, skipping this question (qid:%d)..." %
+                (ques_id))
+            elif len(target_objects) > 1:
+                print(
+                "More than 1 target object found, check this question (qid:%d)..." %
+                (ques_id))
+
+
+
+            stats[ques_id] = target_objects[0]["size"]
+
+
+        gt_path = self.args["ground_truth_path"]
+        stats_file_path = os.path.join(gt_path,"gt_stats.json")
+        util.save_json(stats, stats_file_path)
+
+
+    def save_ground_truth(self, save_stats: bool = True) -> None:
         """
         Saves the ground truths to disk. If the ground truth path has a npy extension,
         all ground truths are saved in a single file. Otherwise, it's saved in a directory
         with file corresponding to a single question with name == question_index.npy
+
+
+        Parameters
+        ---
+        save_stats (bool)
+            Saves ground truth statistics to disk (JSON).
 
         Result
         ---
@@ -91,7 +145,13 @@ class UniqueCLEVREvaluator():
                 file_path = os.path.join(gt_path, str(key) + ".npy")
                 np.save(file_path, self.ground_truth[key])
 
-    def calculate_ground_truth(self, question: dict) -> np.ndarray:
+        if save_stats:
+            stats_file_path = os.path.join(
+                gt_path,
+                util.strip_special_chars(str(self.filters)) + "_stats.json")
+            util.save_json(self.ground_truth_stats, stats_file_path)
+
+    def calculate_ground_truth(self, question: dict) -> Tuple[np.ndarray, dict]:
         """
         Calculatest he ground truth map for a single question.
 
@@ -104,6 +164,9 @@ class UniqueCLEVREvaluator():
         ---
         np.ndarray
             Ground truth boolean array of shape HxW
+        dict
+            Ground truth statistics. Currently only return number
+            of target objects and total number of objects in the scene.
         """
         scene = util.load_json(self.args["scenes_path"] + question["image"] +
                                ".json")
@@ -113,14 +176,14 @@ class UniqueCLEVREvaluator():
             ]
         else:
             target_objects, target_objects_indices = util.get_target_objects(
-                scene["objects"], question["program"])
+                scene["objects"], question["program"], filters=self.filters)
         # Skip questions where there's no target object, ie for exist and count
         # questions with answer False or 0
         if len(target_objects) == 0:
             print(
                 "No target objects found, skipping this question (qid:%d)..." %
                 (question["question_index"]))
-            return None
+            return None, None
 
         # load ground truth mask
         mask_img_path = self.args["masks_path"] + question["image"] + ".png"
@@ -147,7 +210,11 @@ class UniqueCLEVREvaluator():
             # Add to current ground truth
             ground_truth = np.logical_or(ground_truth, target_mask)
 
-        return ground_truth
+        ground_truth_stats = {
+            "target_objects": len(target_objects),
+            "total_objects": len(scene["objects"])
+        }
+        return ground_truth, ground_truth_stats
 
     def calculate_all_ground_truths(self) -> None:
         """
@@ -164,7 +231,7 @@ class UniqueCLEVREvaluator():
         print("Calculating all ground truths...")
         for ques in tqdm(self.questions, total=len(self.questions)):
             ques_id = ques["question_index"]
-            ground_truth = self.calculate_ground_truth(ques)
+            ground_truth, ground_truth_stats = self.calculate_ground_truth(ques)
             if ground_truth is None:
                 continue
             if "heatmap_shape" in self.args:
@@ -173,6 +240,7 @@ class UniqueCLEVREvaluator():
                                                         resize_shape)
 
             self.ground_truth[ques_id] = ground_truth
+            self.ground_truth_stats[ques_id] = ground_truth_stats
 
     def eval_single(self, prediction: dict, question: dict) -> float:
         """
@@ -201,7 +269,7 @@ class UniqueCLEVREvaluator():
         if question["question_index"] in self.ground_truth:
             ground_truth = self.ground_truth[question["question_index"]]
         else:
-            ground_truth = self.calculate_ground_truth(question)
+            ground_truth, _ = self.calculate_ground_truth(question)
             if not ground_truth:
                 return -1
             if "heatmap_shape" in self.args:
@@ -306,6 +374,12 @@ def run():
         action="store_true",
         help="Doesn't evaluate heatmaps and only computes ground truths.")
 
+    parser.add_argument(
+        "--gt-stats",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Only compute GT statistics")
     cmd_args = parser.parse_args()
 
     config_file = cmd_args.config
@@ -319,14 +393,15 @@ def run():
 
     if cmd_args.no_evaluate:
         unique_clevr_evaluator.calculate_all_ground_truths()
-
+    elif cmd_args.gt_stats:
+        unique_clevr_evaluator._calc_ground_truth_stats()
     else:
         unique_clevr_evaluator.evaluate()
         print("Overall accuracy: ",
               unique_clevr_evaluator.get_overall_accuracy())
 
     if not unique_clevr_evaluator.ground_truth_precomputed:
-        unique_clevr_evaluator.save_ground_truth()
+        unique_clevr_evaluator.save_ground_truth(save_stats=True)
 
 
 if __name__ == "__main__":

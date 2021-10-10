@@ -10,6 +10,7 @@ from typing import List, Union, Tuple
 import json
 from PIL import Image
 import numpy as np
+import re
 
 
 def is_numpy_file(filepath: str) -> bool:
@@ -102,6 +103,37 @@ def load_json(filepath: str):
     except FileNotFoundError:
         print("Warning: File %s was not found..." % filepath)
         return None
+
+
+def save_json(data: dict, filepath: str):
+    """
+    Save data as JSON file
+
+    Parameters
+    ---
+    data (dict)
+        Dict to save
+    filepath (str)
+        File path for JSON
+    """
+    with open(filepath, 'w') as file:
+        json.dump(data, file)
+
+
+def strip_special_chars(string: str) -> str:
+    """
+    Strip special characters from string
+
+    Parameters
+    ---
+    string (str)
+        string to strip
+
+    Result
+    ---
+    str
+    """
+    return re.sub('[^A-Za-z0-9]+', '', string)
 
 
 def get_mask_colors(scene: dict) -> List[List[float]]:
@@ -203,12 +235,52 @@ def preprocess_mask_img(img: np.ndarray, mask_colors: np.ndarray,
     return unique_colors, mapping
 
 
-def get_target_objects(objects: List[dict],
-                       program: List[dict]) -> Union[List[dict], List[int]]:
+def build_branches(program: List[dict],
+                   branches_end_nodes: List[int]) -> List[List[int]]:
+    """
+    Build branches (currently only 2 branches are possible) by iterating through
+    the program. Stop once all branches_end_nodes are reached.
+
+    Parameters
+    ---
+    program  (List[dict])
+        Functional program
+    branches_end_nodes (List[int])
+        Indices of the last nodes in branches before the merge into a single node
+
+    Result
+    ---
+    List[List[int]]
+    List of branches (only 2) containing indices of nodes. 
+
+    """
+
+    # not really important since we know it's only 2, but in case
+    # this changes in the future
+    num_branches = len(branches_end_nodes)
+    branches = [[] for i in range(num_branches)]
+
+    for branch_idx, end_node_idx in enumerate(branches_end_nodes):
+        branches[branch_idx].append(end_node_idx)
+        inputs = program[end_node_idx]["inputs"]
+
+        # stop when we reach empty inputs (i.e. scene program)
+        while inputs:
+            # there shouldn't be anymore branches
+            assert len(inputs) == 1
+            prev_node = inputs[0]
+            # append current branch with previous node
+            branches[branch_idx].append(prev_node)
+            inputs = program[prev_node]["inputs"]
+
+    return branches
+
+
+def get_target_objects(objects: List[dict], program: List[dict],
+                       filters: List[str]) -> Union[List[dict], List[int]]:
     """
     Get target objects by iterating the functional program.
-    Currently we get the target objects by getting the last "filter_" program.
-    This works for the current dataset but must be reviewed if we add more templates.
+    Currently we get the target objects depending on the filters supplied.
 
     Parameters
     ---
@@ -216,21 +288,78 @@ def get_target_objects(objects: List[dict],
         Object list
     program (List[dict])
         Functional program
+    filters (List[str])
+        filters to use to create the target objects
+        current possible values (that makes sense):
+        ["union"]: Get all output objects except the scene output (i.e. the first program)
+        ["unique","first_nonempty"]: Get all unique program outputs 
+                                     AND the first non-empty program output.
+                                     In case of tree-structured questions, take first
+                                     non-empty set in all branches if no common first
+                                     non-empty set exists.
+                                     
 
     Result
     ---
     Union[List[dict], List[int]]
     """
-    target_objects = []
-    target_objects_indices = []
-    # find the last filter_* function which has output==index of target objects
-    for func in reversed(program):
-        if func["type"].startswith("filter_"):
-            target_objects_indices = func["_output"]
-            target_objects = [objects[i] for i in target_objects_indices]
-            break
+    OBJECTSET_OUTPUT_PROGRAMS = {
+        "filter_", "relate", "intersect", "union", "same_"
+    }
+    TREE_PROGRAMS = {
+        "union", "intersect", "equal_", "less_than", "greater_than"
+    }
+    target_objects_indices = set()
 
-    return target_objects, target_objects_indices
+    for filter in filters:
+        if filter == "union":
+            # skip first program since it's the scene program
+            for func in program[1:]:
+                # check if the function starts with any item in OBJECTSET_OUTPUT_PROGRAMS
+                if any(map(func["type"].startswith, OBJECTSET_OUTPUT_PROGRAMS)):
+                    target_objects_indices.update(func["_output"])
+        elif filter == "unique":
+            for func in program[1:]:
+                if func["type"] == "unique":
+                    # Unique produces a single item rather than an object list
+                    target_objects_indices.add(func["_output"])
+        elif filter == "first_nonempty":
+            first_nonempty_object_indices = set()
+            branched = False
+            for func in reversed(program):
+                # Break if we branched (ie after we looked through the branches)
+                if branched:
+                    break
+                if any(map(func["type"].startswith, OBJECTSET_OUTPUT_PROGRAMS)):
+                    first_nonempty_object_indices.update(func["_output"])
+                    # If we found the  first nonempty output function we break
+                    if first_nonempty_object_indices:
+                        target_objects_indices.update(
+                            first_nonempty_object_indices)
+                        break
+                    # If we arrive at either OR/AND program and we haven't found any objects yet (inclusive)
+                    # Look equally for a non-empty set in each branch
+                    if any(map(func["type"].startswith, TREE_PROGRAMS)
+                          ) and not first_nonempty_object_indices:
+                        print("BRANCHING OCCURRED!")
+                        branched = True
+                        branches_end_nodes = func["inputs"]
+                        branches = build_branches(program, branches_end_nodes)
+                        for branch in branches:
+                            # no need to go from reverse branches already is listed in reverse
+                            for func_idx in branch:
+                                current_func = program[func_idx]
+                                # True only if function is from OBJECTSET_OUTPUT_PROGRAMS and has non-empty output
+                                if any(
+                                        map(current_func["type"].startswith,
+                                            OBJECTSET_OUTPUT_PROGRAMS)
+                                ) and current_func["_output"]:
+                                    target_objects_indices.update(
+                                        current_func["_output"])
+                                    break
+
+    target_objects = [objects[i] for i in target_objects_indices]
+    return target_objects, list(target_objects_indices)
 
 
 def load_heatmap(filename: str) -> np.ndarray:
@@ -311,3 +440,19 @@ def calc_overlap(ground_truth: np.ndarray, heatmap: np.ndarray) -> float:
     # Return overlap of correct relevance over total relevance
     overlap = correct_relevance / total_relevance
     return overlap
+
+def _stat_ground_truth_pixels(ground_truth: np.ndarray) -> int:
+    """
+    Calculates the number of pixels ina given ground_truth array.
+    Parameters
+    ---
+    ground_truth (np.ndarray)
+        Ground truth boolean mask
+
+    Result
+    ---
+    int
+        number of pixels in ground truth object
+    """
+
+    return np.count_nonzero(ground_truth)
