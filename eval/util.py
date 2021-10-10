@@ -291,7 +291,9 @@ def get_target_objects(objects: List[dict], program: List[dict],
     filters (List[str])
         filters to use to create the target objects
         current possible values (that makes sense):
+        ["first"]: Get the output objects in the last program. To be used with simple questions only!
         ["union"]: Get all output objects except the scene output (i.e. the first program)
+        ["unique"]: Get all unique program outputs
         ["unique","first_nonempty"]: Get all unique program outputs 
                                      AND the first non-empty program output.
                                      In case of tree-structured questions, take first
@@ -312,7 +314,13 @@ def get_target_objects(objects: List[dict], program: List[dict],
     target_objects_indices = set()
 
     for filter in filters:
-        if filter == "union":
+        if filter == "first":
+            assert len(filters) == 1, "first filter should only be used with simple questions!"
+            for func in reversed(program):
+                if func["type"].startswith("filter_"):
+                    target_objects_indices.add(func["_output"])
+                    break
+        elif filter == "union":
             # skip first program since it's the scene program
             for func in program[1:]:
                 # check if the function starts with any item in OBJECTSET_OUTPUT_PROGRAMS
