@@ -41,13 +41,13 @@ For more details on the definition of each GT please refer to the [paper](https:
 ## I. Dataset Download
 
  
-The dataset can be downloaded from the [releases](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) section of this repository.
+The dataset can be downloaded from the [releases](https://github.com/ahmedmagdiosman/clevr-xai/releases) section of this repository.
 
 
 
 ## II. Dataset Generation
 
-For the sake of completeness and to promote future research, we additionally provide the code to generate the CLEVR-XAI dataset. Note that if you are only interested in using the released version of our dataset you don't need to re-generate the dataset yourself and can directly download it [here](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases), thus you can skip the following generation steps.
+For the sake of completeness and to promote future research, we additionally provide the code to generate the CLEVR-XAI dataset. Note that if you are only interested in using the released version of our dataset you don't need to re-generate the dataset yourself and can directly download it [here](https://github.com/ahmedmagdiosman/clevr-xai/releases), thus you can skip the following generation steps.
 
 Our code to generate CLEVR-XAI is built upon the original [CLEVR generator](https://github.com/facebookresearch/clevr-dataset-gen/).
 
