@@ -18,19 +18,19 @@ The **CLEVR-XAI dataset** consists of **39,761 simple questions (CLEVR-XAI-simpl
 - _GT Union_ (for 99,786 questions)
 - _GT All Objects_ (for all questions)
 
-Note: For some complex questions a few GT masks are unavailable, since for these questions the masks are unspecified/empty.
+Note: For some complex questions a few GT masks are unavailable, since for these questions the masks are undefined/empty.
 
 
 | <sub>CLEVR-XAI-simple</sub>  |  <sub>Image</sub>  |  <sub>GT Single Object</sub> |  <sub>GT All Objects</sub>  |
 |:--------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
-| **What is the <br> small yellow <br>sphere made <br> of?** <br> *metal*  | <img src="images/2891_original.png" width="256">        |   <img src="images/2891_GT_Single_Object.png" width="256">  |   <img src="images/2891_GT_All_Objects.png" width="256">  |
+| <sub>**What is the <br> small yellow <br>sphere made of?** <br> *metal*</sub>  | <img src="images/2891_original.png" width="256">        |   <img src="images/2891_GT_Single_Object.png" width="256">  |   <img src="images/2891_GT_All_Objects.png" width="256">  |
 |  <sub>**LRP**</sub>  | <sub>**Integrated Gradients**</sub>  | <sub>**Guided Backprop**</sub> | <sub>**Grad-CAM**</sub> |
 |  <img src="images/2891_LRP.png" width="256">   |  <img src="images/2891_IG.png" width="256">   |  <img src="images/2891_GB.png" width="256" >   | <img src="images/2891_GCAM.png" width="256" >   |
 
 
 | <sub>CLEVR-XAI-complex</sub>  |  <sub>Image</sub>  |  <sub>GT Unique</sub> |  <sub>GT Unique First-non-empty</sub>  |
 |:--------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
-| **Is there any <br> other thing <br> that has the <br> same size as <br> the shiny <br> sphere?** <br> *yes*  | <img src="images/57_original.png" width="256">        |   <img src="images/57_GT_Unique.png" width="256">  |   <img src="images/57_GT_Unique_Firstnonempty.png" width="256">  |
+| <sub>**Is there any <br> other thing <br> that has the <br> same size as <br> the shiny sphere?** <br> *yes*</sub>  | <img src="images/57_original.png" width="256">        |   <img src="images/57_GT_Unique.png" width="256">  |   <img src="images/57_GT_Unique_Firstnonempty.png" width="256">  |
 |  <sub>**LRP**</sub>  | <sub>**Integrated Gradients**</sub>  | <sub>**Guided Backprop**</sub> | <sub>**Grad-CAM**</sub> |
 |  <img src="images/57_LRP.png" width="256">   |  <img src="images/57_IG.png" width="256">   |  <img src="images/57_GB.png" width="256" >   | <img src="images/57_GCAM.png" width="256" >   |
 
