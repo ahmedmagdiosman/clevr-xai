@@ -1,9 +1,9 @@
 
-# Generating Questions
+# Step 2: Question Generation
 
 To generate questions, run the script `question_generation/unique_question_gen_run.sh`. Show help with `-h`.
 
-### Simple Questions
+### CLEVR-XAI-simple
 
 ```bash
 cd question_generation
@@ -12,7 +12,7 @@ cd question_generation
   --templatedir ./CLEVR_unique_templates
 ```
 
-### Complex Questions
+### CLEVR-XAI-complex
 
 ```bash
 cd question_generation
