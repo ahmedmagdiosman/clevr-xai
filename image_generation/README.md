@@ -2,7 +2,7 @@
 
 Images are rendered in the same fashion as in the original CLEVR dataset with one difference. We additionally create a segmentation mask for every object in the scene (for the segmentation mask each object gets assigned a unique color). These segmentation masks will be later useful to create ground truth masks and evaluate explanation methods. 
 
-To generate the images, you need to run the singularity blender container. There is also a pre-built singularity image in the [releases](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) of this repository for convenience. 
+To generate the images, you need to run the singularity blender container. There is also a pre-built singularity image in the [releases](https://github.com/ahmedmagdiosman/clevr-xai/releases) of this repository for convenience. 
 
 ## 1. Singularity Image
 
