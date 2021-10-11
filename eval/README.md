@@ -1,11 +1,11 @@
 # Step 3: Ground Truth Masks Generation 
 (In the future this step may also include the code to evaluate heatmaps/XAI methods)
 
-To generate the ground truth masks, you can run the eval container. There is also a pre-built image in the [releases](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) of this repository for convenience. 
+To generate the ground truth masks, you can run the eval container. There is also a pre-built image in the [releases](https://github.com/ahmedmagdiosman/clevr-xai/releases) of this repository for convenience. 
 
 Currently the heatmap evaluation code is packaged separately from this repository as a [gist](https://gist.github.com/ArrasL/0bc02ef98e369f861aec40145a58e356) (in the future we may integrate the evaluation process into the present `eval` folder).
 
-**Alternatively, you can run the ground truth generation without a container. We supply the [requirements.txt](https://github.com/ahmedmagdiosman/simply-clevr-dataset/blob/master/eval/requirements.txt) so you can build a virtualenv with it. Make sure to adjust the paths in `eval/config.yaml` respectively.**
+**Alternatively, you can run the ground truth generation without a container. We supply the [requirements.txt](https://github.com/ahmedmagdiosman/clevr-xai/blob/master/eval/requirements.txt) so you can build a virtualenv with it. Make sure to adjust the paths in `eval/config.yaml` respectively.**
 
 
 ## 1. Singularity Image
@@ -50,7 +50,7 @@ cd eval/
 * CLEVR_scenes.json: The scene structure information generated from Step 1: Image Generation.
 * CLEVR_questions.json: The questions JSON file generated from Step 2: Question Generation.
 
-`$CONFIG` specifies a config file to supply the mask generation code (and in the future maybe also the XAI method evaluation code) with needed arguments. The default config files can be found here: [complex_questions](config.yaml), [simple questions](config_simple.yaml).
+`$CONFIG` specifies a config file to supply the mask generation code (and in the future maybe also the XAI method evaluation code) with needed arguments. The default config files for CLEVR-XAI-simple and CLEVR-XAI-complex can be found here: [simple questions](config_simple.yaml),  [complex_questions](config.yaml).
 **The paths are related to the singularity container not your host machine!**
 
 The `--sif` parameter is optional. It points the script to the location of the singularity sif file. By default, it is expected to be in `eval/eval-unique-clevr.sif`.
@@ -76,8 +76,8 @@ In `config.yaml`, change `filters` to:
 To generate *GT All Objects*, change `target_all` to true.
 
 ### Generating a Different Sized Ground Truth
-The ground truths masks we provide in our [released CLEVR-XAI dataset](https://github.com/ahmedmagdiosman/simply-clevr-dataset/releases) map the Relation Network model's input image dimensions (i.e. the masks are resized to 128x128).
-If the heatmaps you are evaluating have a different size, you can generate the appropriate ground truth by changing the `heatmap_shape` option in `config.yaml` and re-run the ground truth generation script above.
+The ground truths masks we provide in our [released CLEVR-XAI dataset](https://github.com/ahmedmagdiosman/clevr-xai/releases) map the Relation Network model's input image dimensions (i.e. the masks are resized to 128x128).
+If the heatmaps you are evaluating have a different size, you can generate the appropriate ground truth by changing the `heatmap_shape` option in `config_simple.yaml`, resp. `config.yaml`, and re-run the ground truth generation script above.
 
 
 ## 3. Heatmap Evaluation
@@ -100,7 +100,7 @@ cd eval
 * Predictions directory: `predictions` directory containing the predictions made by your model. Each model's prediction should be saved in a single file as a list of dicts.
     - Example: `[{"answer":1, "question_index": 0},{"answer": "cylinder", "question_index": 1}]`
 
-`$CONFIG` specifies a config file to supply the evaluation code with needed arguments. The default config file can be found [here](https://github.com/ahmedmagdiosman/simply-clevr-dataset/blob/master/eval/config.yaml). **The paths are related to the singularity container not your host machine!**
+`$CONFIG` specifies a config file to supply the evaluation code with needed arguments. The default config file can be found [here](config.yaml). **The paths are related to the singularity container not your host machine!**
 
 The `--sif` parameter is optional. It points the script to the location of the singularity sif file. By default, it is expected to be in `eval/eval-unique-clevr.sif`.
 
